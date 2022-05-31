@@ -1,0 +1,76 @@
+SELECT ITEM_NUMBER KEY,    ----------- Llave principal
+'INV'  TEMPLATE,  --------- 
+'en-ES' LOCALE, -------------idioma 
+'PDF' OUTPUT_FORMAT, ----------formato del reporte 
+'EMAIL' DEL_CHANNEL,  -------------medio por el cual se envía el reporte
+'QWERT',            ----------------nombre del reporte
+(SELECT
+      LISTAGG(DESCRIPTION,',')
+ FROM FND_LOOKUP_VALUES 
+ WHERE 1=1
+ AND LOOKUP_TYPE = 'XXJHM_EMAILS_LOOKUP'
+ AND LANGUAGE = 'US'
+) PARAMETER1,    ---------------destinatario 
+'jhernandez@it-globalsolutions.com.mx' PARAMETER3,         ---------------remitente 
+'Reporte existencias en inventario' PARAMETER4, ----------------- asunto
+'Estimado colaborador,
+ Se enlista el resumen de existencias en inventario, de acuerdo a las politicas establecidas
+Este correo es sólo informativo, favor de no responder. Gracias.' as  PARAMETER5, --body
+'true' PARAMETER6  ----------que se adjunto correctamente el reporte 
+from (
+   SELECT 
+    ESI.ITEM_NUMBER ,
+    ESI.DESCRIPTION ,
+    IOQD.SUBINVENTORY_CODE,
+    IOQD.LOT_NUMBER,
+    SUM(IOQD.TRANSACTION_QUANTITY) TRX_QTY,
+    UOMT.UNIT_OF_MEASURE,
+    IIL.INVENTORY_LOCATION_ID,
+    EGT.CATEGORY_NAME
+FROM 
+    INV_ONHAND_QUANTITIES_DETAIL IOQD ,
+    EGP_SYSTEM_ITEMS ESI ,
+    INV_ORG_PARAMETERS IOP ,
+    INV_ORGANIZATION_DEFINITIONS_V IODV,
+    INV_UNITS_OF_MEASURE_TL UOMT ,
+    INV_UNITS_OF_MEASURE_B UOMB,
+    INV_ITEM_LOCATIONS IIL,
+    EGP_ITEM_CATEGORIES EIC,
+    EGP_CATEGORIES_TL EGT
+WHERE 1 = 1
+AND IODV.ORGANIZATION_ID    = IOP.ORGANIZATION_ID
+AND IOQD.INVENTORY_ITEM_ID  = ESI.INVENTORY_ITEM_ID
+AND IOQD.ORGANIZATION_ID    = ESI.ORGANIZATION_ID
+AND ESI.ORGANIZATION_ID     = IOP.ORGANIZATION_ID
+AND UOMT.UNIT_OF_MEASURE_ID = UOMB.UNIT_OF_MEASURE_ID
+AND UOMT.LANGUAGE = 'US'
+AND UOMB.UOM_CODE           = IOQD.TRANSACTION_UOM_CODE
+AND IOQD.ORGANIZATION_ID    = IIL.ORGANIZATION_ID(+)
+AND IOQD.SUBINVENTORY_CODE  = IIL.SUBINVENTORY_CODE(+)
+AND IOQD.LOCATOR_ID         =IIL.INVENTORY_LOCATION_ID(+)
+and ESI.INVENTORY_ITEM_ID = EIC.INVENTORY_ITEM_ID(+)--
+and ESI.organization_id = EIC.organization_id(+)--
+AND EGT.CATEGORY_ID = EIC.CATEGORY_ID
+AND EGT.LANGUAGE = 'US'
+AND ESI.ITEM_NUMBER        = :NUMBER_ITEM
+AND ESI.ORGANIZATION_ID = :ORG_ID
+GROUP BY 
+  ESI.ITEM_NUMBER ,
+  ESI.DESCRIPTION ,
+  UOMT.UNIT_OF_MEASURE ,
+  IOQD.SUBINVENTORY_CODE ,
+  IOQD.LOT_NUMBER,
+  IIL.INVENTORY_LOCATION_ID,
+  EGT.CATEGORY_NAME
+ORDER BY 1,2
+)
+order by 1, 3
+
+
+SELECT LISTAGG(nombre, '; ') WITHIN GROUP (ORDER BY nombre) over (partition by puesto) LISTA_NOMBRES,
+       puesto,
+       nombre
+FROM tabla t
+ORDER BY puesto, nombre;
+
+SELECT LISTAGG(DESCRIPTION,',') FROM FND_LOOKUP_VALUES WHERE LOOKUP_TYPE = 'XXJHM_EMAILS_LOOKUP' AND LANGUAGE = 'US'

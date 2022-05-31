@@ -1,0 +1,22 @@
+--reporte de existencias por proceso programado
+ parametros : organizacion de inventario (obligatorio), articulo opcional (item number)
+ datos: 
+--ok  item number,
+--OK  descripcion,
+--OK  categoria, 
+--OK  subinventario,
+--OK  locaitor,
+--OK  lote (opcional),
+XS  serial,
+--OK  cantidad (la existencia en el lote),
+--OK  unidad de medida,
+  subtotal(x articulo)
+
+enviar correo electronico uno o mas usuarios
+
+221493
+
+VBoxManage setextradata "MacOS BigSur" "VBoxInternal/TM/TSCMode" "RealTSCOffset"
+
+
+
